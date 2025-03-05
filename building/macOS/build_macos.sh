@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-echo "Building maacOS target ..."
+echo "Building macOS target ..."
 
 echo "Installing requirements ..."
-pip install -r requirements.txt
-pip install nuitka==2.3 imageio
+python3 -m venv venv
+source venv/bin/activate
+
+# Install requirements with xargs to continue on error (pyside6)
+cat requirements.txt | xargs -n 1 pip install
+pip install nuitka imageio pyside6
+
+# remove all .DS_Store files from the project since Nuitka errors out on them
+find . -name '.DS_Store' -type f -delete
 
 echo "Building with Nuitka ..."
 python -m nuitka app.py \
