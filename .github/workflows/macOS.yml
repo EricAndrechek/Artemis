@@ -21,10 +21,35 @@ jobs:
         with:
           python-version: '3.12'
           architecture: 'x64'
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install nuitka
+          pip install PySide6
+          pip install requests
+          pip install imageio
 
-      - name: Build and package
-        run: sh ./building/macOS/build_macos.sh
-        shell: bash
+      - name: Qt GUI with PySide6
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: app.py
+          mode: standalone
+          assume-yes-for-downloads: true
+          enable-plugins: pyside6
+          include-qt-plugins: sensible,styles,qml,multimedia
+          include-data-files: |
+            ./artemis/resources.py=./artemis/resources.py
+            ./config/qtquickcontrols2.conf=./config/qtquickcontrols2.conf
+            ./building/Linux/create_shortcut.sh=./create_shortcut.sh
+          macos-app-icon: images/artemis_icon.ico
+          macos-signed-app-name: com.AresValley.Artemis
+          macos-app-name: Artemis
+          macos-app-mode: gui
+          macos-sign-identity: ad-hoc
+          macos-app-version: ${{github.event.inputs.artemis_version}}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
